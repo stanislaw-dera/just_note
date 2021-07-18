@@ -1,91 +1,66 @@
 import 'package:flutter/material.dart';
-import 'package:just_note/utils/memory.dart';
-import 'package:just_note/utils/options.dart';
-import 'package:just_note/utils/welcome.dart';
+import 'package:just_note/db/database.dart';
+import 'package:just_note/models/note.dart';
+import 'package:just_note/screens/create.dart';
+import 'package:just_note/widgets/no_notes_info.dart';
+import 'package:just_note/widgets/note_tile.dart';
+import 'package:just_note/widgets/show_about_dialog_button.dart';
 
-class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
-
+class NotesPage extends StatefulWidget {
   @override
-  _HomeState createState() => _HomeState();
+  _NotesPageState createState() => _NotesPageState();
 }
 
-class _HomeState extends State<Home> {
+class _NotesPageState extends State<NotesPage> {
+  late List<Note> notes;
+  bool isLoading = false;
 
-  // txt is being used to add note from memory into the TextField
-  var txt = TextEditingController();
-
-  final snackBar = SnackBar(content: Text('Yay! A SnackBar!'));
-
-  // setup all the stuff
   @override
   void initState() {
     super.initState();
-
-    void setup() async {
-      // check if it's first time the app is running
-      if(await Memory().isFirstTime() == false) {
-        showWelcomeDialog(context);
-      } else {
-        txt.text = await Memory().getNote(); // get note from memory
-      }
-    }
-
-    setup();
+    refreshNotes();
   }
 
   @override
-  Widget build(BuildContext context) {
-
-
-    void _showMoreOptionsPanel() {
-      showModalBottomSheet(context: context, builder: (context) {
-        return Container(
-          padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
-          child: ListView.builder(
-              itemCount: 1,
-              itemBuilder: (context, index) {
-                return Card(
-                  child: ListTile(
-                    title: Text('Add divider'),
-                    subtitle: Text('Divide one part of your note from another'),
-                    onTap: () => {
-                      Navigator.pop(context),
-                      txt.text += '\n\n=====================\n\n'
-                    },
-                  ),
-                );
-              },
-          )
-        );
-      });
-    }
-
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.pink[400],
-        title: Text('JustNote!'),
-        actions: [
-          IconButton(onPressed: () => _showMoreOptionsPanel(), icon: Icon(Icons.more_vert))
-        ],
-      ),
-      body: Container(
-          child: TextField(
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: 'Start typing...',
-              contentPadding: EdgeInsets.all(20.0),
-            ),
-            expands: true,
-            minLines: null,
-            maxLines: null,
-            textAlignVertical: TextAlignVertical.top,
-            textAlign: TextAlign.left,
-            controller: txt,
-            onChanged: (val) => {Memory().saveNote(val)}, // autosave
-          )),
-    );
+  void dispose() {
+    NotesDatabase.instance.close();
+    super.dispose();
   }
 
+  Future refreshNotes() async {
+    setState(() => isLoading = true);
+    this.notes = await NotesDatabase.instance.readAllNotes();
+    setState(() => isLoading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(
+        title: Text('inoNotes'),
+        actions: [ShowAboutDialogBtn()],
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.create),
+        onPressed: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => Create()),
+          );
+
+          refreshNotes();
+        },
+      ),
+      body: Center(
+        child: isLoading ? CircularProgressIndicator() : notes.isEmpty ? NoNotesInfo() : buildNotes(),
+      ));
+
+  Widget buildNotes() => Padding(
+      padding: EdgeInsets.all((8)),
+      child: ListView.builder(
+          itemCount: notes.length,
+          itemBuilder: (context, index) {
+            return NoteTile(
+                content: notes[index].content,
+                id: notes[index].id,
+                refreshNotes: refreshNotes);
+          }));
 }

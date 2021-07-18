@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:just_note/compatibility/compatibility_check.dart';
 import 'package:just_note/screens/home.dart';
 
 void main() {
   runApp(MyApp());
+  doCompatibilityCheck();
 }
 
 class MyApp extends StatelessWidget {
@@ -11,8 +13,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Home(),
-      title: 'JustNote!',
+      title: 'inoNotes',
+      home: NotesPage(),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        accentColor: Colors.pinkAccent
+      ),
     );
   }
 }
