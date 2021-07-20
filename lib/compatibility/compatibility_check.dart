@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void doCompatibilityCheck() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  if(prefs.get('note').toString().length > 0) {
+  if(prefs.get('note') != null) {
     // start migration
     Note newNote = Note(content: prefs.get('note').toString());
     await NotesDatabase.instance.create(newNote);
