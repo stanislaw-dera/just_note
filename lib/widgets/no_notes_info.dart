@@ -5,11 +5,13 @@ class NoNotesInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      'No notes :(',
-      style: TextStyle(
-          fontSize: 26,
-          fontWeight: FontWeight.w300
+    return Center(
+      child: Text(
+        'No notes :(',
+        style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w300
+        ),
       ),
     );
   }

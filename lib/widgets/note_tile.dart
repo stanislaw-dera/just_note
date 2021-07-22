@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:just_note/db/database.dart';
+import 'package:just_note/models/note.dart';
 
 class NoteTile extends StatelessWidget {
 
-  final String content;
-  final int? id;
-  final Function refreshNotes;
+  final Note note;
+  final Function delete;
 
-  NoteTile({required this.content, required this.id, required this.refreshNotes});
+  NoteTile({required this.note, required this.delete});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        title: Text(content),
+        title: note.title == '' ? Text(note.content) : Text(note.title),
+        subtitle: note.title == '' ? null : note.content == '' ? null : Text(note.content), // if note's title is empty, return content as title
         onLongPress: () async {
           showDialog<String>(
               context: context,
@@ -26,10 +26,8 @@ class NoteTile extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () async {
+                      delete();
                       Navigator.pop(context);
-                      await NotesDatabase.instance.delete(
-                          int.parse(id.toString()));
-                      refreshNotes();
                     },
                     child: const Text('Yes'),
                   ),

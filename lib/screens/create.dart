@@ -1,50 +1,68 @@
 import 'package:flutter/material.dart';
-import 'package:just_note/db/database.dart';
-import 'package:just_note/models/note.dart';
+import 'package:just_note/services/database.dart';
 
-class Create extends StatefulWidget {
-  const Create({Key? key}) : super(key: key);
+class CreateScreen extends StatefulWidget {
+
+  final DatabaseService databaseService;
+
+  const CreateScreen({required this.databaseService});
 
   @override
-  _CreateState createState() => _CreateState();
+  _CreateScreenState createState() => _CreateScreenState();
 }
 
-class _CreateState extends State<Create> {
+class _CreateScreenState extends State<CreateScreen> {
+  String noteTitle = '';
   String noteContent = '';
 
   @override
+  void dispose() {
+    saveNote();
+    super.dispose();
+  }
+
+  void saveNote() {
+    if(noteTitle.length != 0 || noteContent.length != 0) widget.databaseService.addNote(noteTitle, noteContent);
+  }
+
+  @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('New note'),
-        actions: [
-          TextButton(
-              onPressed: () async => {
-                    await NotesDatabase.instance
-                        .create(Note(content: this.noteContent)),
-                    Navigator.pop(context)
-                  },
-              child: Text(
-                'Save',
-                style: TextStyle(color: Colors.white),
-              ))
-        ],
-      ),
-      body: Container(
-          child: TextField(
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: 'Start typing...',
-          contentPadding: EdgeInsets.all(20.0),
+        appBar: AppBar(
+          title: Text('New note'),
         ),
-        expands: true,
-        minLines: null,
-        maxLines: null,
-        textAlignVertical: TextAlignVertical.top,
-        textAlign: TextAlign.left,
-        onChanged: (val) => {setState(() => noteContent = val)},
-      )),
-    );
-    ;
+        body: Container(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            children: [
+              TextFormField(
+                maxLines: 1,
+                style: TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 24,
+                ),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Title',
+                ),
+                onChanged: (val) {
+                  setState(() => noteTitle = val);
+                },
+              ),
+              TextFormField(
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
+                maxLines: 10,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Type something...',
+                ),
+                onChanged: (val) {
+                  setState(() => noteContent = val);
+                },
+              )
+            ],
+          ),
+        ));
   }
 }

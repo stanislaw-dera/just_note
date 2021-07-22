@@ -1,66 +1,61 @@
 import 'package:flutter/material.dart';
-import 'package:just_note/db/database.dart';
 import 'package:just_note/models/note.dart';
+import 'package:just_note/models/the_user.dart';
 import 'package:just_note/screens/create.dart';
+import 'package:just_note/services/database.dart';
+import 'package:just_note/widgets/more_options_sheet.dart';
 import 'package:just_note/widgets/no_notes_info.dart';
 import 'package:just_note/widgets/note_tile.dart';
-import 'package:just_note/widgets/show_about_dialog_button.dart';
+import 'package:provider/provider.dart';
 
-class NotesPage extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
   @override
-  _NotesPageState createState() => _NotesPageState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _NotesPageState extends State<NotesPage> {
-  late List<Note> notes;
-  bool isLoading = false;
+class _HomeScreenState extends State<HomeScreen> {
+
 
   @override
-  void initState() {
-    super.initState();
-    refreshNotes();
-  }
+  Widget build(BuildContext context) {
 
-  @override
-  void dispose() {
-    NotesDatabase.instance.close();
-    super.dispose();
-  }
+    final UserData userData = Provider.of(context);
+    final user = Provider.of<TheUser?>(context);
+    final List<Note> notes = notesFromDB(userData.notes);
 
-  Future refreshNotes() async {
-    setState(() => isLoading = true);
-    this.notes = await NotesDatabase.instance.readAllNotes();
-    setState(() => isLoading = false);
-  }
+    DatabaseService databaseService = DatabaseService(uid: user!.uid);
 
-  @override
-  Widget build(BuildContext context) => Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text('inoNotes'),
-        actions: [ShowAboutDialogBtn()],
+        actions: [
+          IconButton(onPressed: () {
+            showModalBottomSheet(context: context, builder: (BuildContext context) {
+              return MoreOptionsSheet();
+            });
+          }, icon: Icon(Icons.more_vert))
+        ],
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.create),
-        onPressed: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => Create()),
-          );
-
-          refreshNotes();
+        child: Icon(Icons.add),
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateScreen(databaseService: databaseService,)));
         },
       ),
-      body: Center(
-        child: isLoading ? CircularProgressIndicator() : notes.isEmpty ? NoNotesInfo() : buildNotes(),
-      ));
-
-  Widget buildNotes() => Padding(
-      padding: EdgeInsets.all((8)),
-      child: ListView.builder(
+      body: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: notes.isEmpty ? NoNotesInfo() : ListView.builder(
           itemCount: notes.length,
           itemBuilder: (context, index) {
-            return NoteTile(
-                content: notes[index].content,
-                id: notes[index].id,
-                refreshNotes: refreshNotes);
-          }));
+            return NoteTile(note: notes[index], delete: () {
+              userData.notes.removeAt(index);
+              databaseService.updateNotes(userData.notes);
+            });
+          },
+        ),
+      ),
+    );
+  }
 }
