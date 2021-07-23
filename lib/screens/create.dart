@@ -22,7 +22,7 @@ class _CreateScreenState extends State<CreateScreen> {
   }
 
   void saveNote() {
-    if(noteTitle.length != 0 || noteContent.length != 0) widget.databaseService.addNote(noteTitle, noteContent);
+    if(noteTitle.length != 0 || noteContent.length != 0) widget.databaseService.addNote(title: noteTitle, content:  noteContent);
   }
 
   @override

@@ -22,12 +22,13 @@ class DatabaseService {
     });
   }
 
-  Future addNote(String title, String content) async {
+  Future addNote({String title = '', String content = '', String? imageUrl}) async {
     return await usersCollection.doc(uid).update({
       'notes': FieldValue.arrayUnion([
         {
           'title': title,
-          'content': content
+          'content': content,
+          'image': imageUrl
         }
       ])
     });

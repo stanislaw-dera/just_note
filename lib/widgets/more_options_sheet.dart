@@ -45,7 +45,7 @@ class MoreOptionsSheet extends StatelessWidget {
                   showAboutDialog(
                       context: context,
                       applicationName: 'inoNotes',
-                      applicationVersion: '3.0.0',
+                      applicationVersion: '3.1.0',
                       applicationLegalese: '© 2021 Stanisław Dera',
                       applicationIcon: CircleAvatar(backgroundImage: AssetImage('assets/app_logo.png'),)
                   );
