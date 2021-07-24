@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(onPressed: () {
             showModalBottomSheet(
                 context: context, builder: (BuildContext context) {
-              return MoreOptionsSheet();
+              return MoreOptionsSheet(databaseService: databaseService,);
             });
           }, icon: Icon(Icons.more_vert))
         ],

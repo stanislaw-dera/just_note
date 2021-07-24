@@ -4,6 +4,12 @@ class Note {
   final String? image;
 
   const Note({this.title = '', this.content = '', this.image});
+
+  static Note fromJson(Map<String, Object?> json) => Note(
+    title: '',
+    content: json['content'] as String,
+    image: null
+  );
 }
 
 List<Note> notesFromDB(List notesFromDB) {

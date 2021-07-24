@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:just_note/compatibility/get_sqlite_notes.dart';
+import 'package:just_note/models/note.dart';
 import 'package:just_note/services/auth.dart';
+import 'package:just_note/services/database.dart';
 
 class MoreOptionsSheet extends StatelessWidget {
-  const MoreOptionsSheet({Key? key}) : super(key: key);
+
+  final DatabaseService databaseService;
+
+  MoreOptionsSheet({required this.databaseService});
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +44,22 @@ class MoreOptionsSheet extends StatelessWidget {
             ),
             Card(
               child: ListTile(
+                title: Text('Recover my notes'),
+                leading: Icon(Icons.history),
+                onTap: () async {
+
+                  final List<Note> recoveredNotes = await getSQLiteNotes();
+
+                  for(int i = 0; i < recoveredNotes.length; i++) {
+                    await databaseService.addNote(title: '', content: recoveredNotes[i].content);
+                  }
+
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+            Card(
+              child: ListTile(
                 title: Text('About the app'),
                 leading: Icon(Icons.info_outline),
                 onTap: () {
@@ -45,7 +67,7 @@ class MoreOptionsSheet extends StatelessWidget {
                   showAboutDialog(
                       context: context,
                       applicationName: 'inoNotes',
-                      applicationVersion: '3.1.0',
+                      applicationVersion: '3.2.0',
                       applicationLegalese: '© 2021 Stanisław Dera',
                       applicationIcon: CircleAvatar(backgroundImage: AssetImage('assets/app_logo.png'),)
                   );
